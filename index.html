@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Surpresa | Gislaine & Wandson</title>
+    <title>Convite — Padrinhos | Gislaine & Wandson</title>
     <meta name="color-scheme" content="light only">
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600;800&display=swap"
         rel="stylesheet">
@@ -523,7 +523,7 @@
             margin: 22px 0 6px
         }
 
-        /* Canvas de efeitos – agora sempre por cima */
+        /* Canvas de efeitos – sempre por cima */
         canvas#effects {
             position: fixed;
             inset: 0;
@@ -531,7 +531,6 @@
             opacity: 0;
             transition: opacity .25s;
             z-index: 2147483647;
-            /* SUPER alto para ficar acima da carta/envelope */
         }
 
         canvas#effects.show {
@@ -580,14 +579,15 @@
             <p class="greet" id="greet">Queremos você pertinho neste dia inesquecível. Aceita viver esse momento com a
                 gente?</p>
 
-            <p class="quote">“O amor é a poesia dos sentidos.” — Honoré de Balzac</p>
+            <!-- Citação bíblica -->
+            <p class="quote">“O amor é paciente, é bondoso.” — 1&nbsp;Coríntios&nbsp;13:4</p>
 
             <div class="grid">
                 <div class="pill"><b>Data</b> <span id="dateTxt">10 de abril de 2026</span></div>
                 <div class="pill"><b>Horário</b> <span id="timeTxt">16:00</span></div>
                 <div class="pill"><b>Local</b> <span><a id="mapLink" target="_blank" rel="noreferrer noopener">Ver no
                             mapa</a></span></div>
-                <div class="pill"><b>Traje</b> <span>Elegante</span></div>
+                <!-- REMOVIDO: Traje -->
             </div>
 
             <div class="countdown" id="countdown" aria-live="polite"></div>
@@ -605,7 +605,7 @@
         </article>
     </main>
 
-    <!-- Canvas movido para o FINAL do body e com z-index altíssimo -->
+    <!-- Canvas por cima de tudo -->
     <canvas id="effects"></canvas>
 
     <script>
@@ -615,7 +615,7 @@
                 rsvpPhone: "5568996129443",  // seu WhatsApp
                 eventDate: new Date("2026-04-10T00:00:00-04:00"),
                 eventTimeText: "16:00",
-                mapUrl: "https://maps.app.goo.gl/kSxYRzMQfReGQSyc6?g_st=ac",
+                mapUrl: "https://maps.google.com/?q=Igreja+da+Sua+Escolha",
                 messages: {
                     greet: () => `Queremos você pertinho neste dia inesquecível. Aceita viver esse momento com a gente?`,
                     accept: `Olá! Confirmo com muita alegria: serei padrinho/madrinha do casamento da Gislaine & Wandson! 💖`,
@@ -827,7 +827,7 @@
                 }, durationMs);
             }
 
-            // ------- Inicialização básica ------- //
+            // ------- Inicialização ------- //
             document.getElementById('bride').textContent = cfg.couple.bride;
             document.getElementById('groom').textContent = cfg.couple.groom;
             guestEl.textContent = "você";
@@ -869,13 +869,13 @@
             // WhatsApp helper
             const wa = (text) => `https://wa.me/${cfg.rsvpPhone}?text=${encodeURIComponent(text)}`;
 
-            // Aceitar: 3s de animação top e depois abre o WhatsApp
+            // Aceitar: 3s de animação e depois abre o WhatsApp
             acceptBtn.addEventListener('click', () => {
                 epicCelebrate(acceptBtn, 3000);
                 setTimeout(() => { window.open(wa(cfg.messages.accept), '_blank'); }, 3000);
             });
 
-            // Recusar: abre direto com texto gentil
+            // Recusar: abre direto
             declineBtn.addEventListener('click', () => {
                 window.open(wa(cfg.messages.decline), '_blank');
             });
@@ -889,7 +889,7 @@
                 const ics =
                     `BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//Convite Surpresa//PT-BR
+PRODID:-//Convite Padrinhos//PT-BR
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
@@ -911,7 +911,6 @@ END:VCALENDAR`;
             }
             calendarBtn.addEventListener('click', downloadICS);
 
-            // update canvas size while animating
             addEventListener('resize', () => { if (animId) { resizeCanvas(); } });
         })();
     </script>

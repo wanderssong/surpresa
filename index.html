@@ -117,7 +117,7 @@
             opacity: .95
         }
 
-        /* Sparkles ao redor do selo */
+        /* brilhinhos no selo */
         .sparkle {
             position: absolute;
             left: 50%;
@@ -316,14 +316,10 @@
             }
         }
 
-        /* estado de "carregando" no aceitar */
+        /* estado "carregando" visual no aceitar */
         .btn.loading {
             pointer-events: none;
             filter: brightness(1.08) contrast(1.05)
-        }
-
-        .btn.loading span {
-            opacity: .9
         }
 
         .btn.loading .shine {
@@ -523,14 +519,22 @@
             margin: 22px 0 6px
         }
 
-        /* Canvas de efeitos – sempre por cima */
+        /* Canvas de efeitos – sempre por cima e compatível com iOS */
         canvas#effects {
             position: fixed;
-            inset: 0;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             pointer-events: none;
+            touch-action: none;
             opacity: 0;
             transition: opacity .25s;
-            z-index: 2147483647;
+            z-index: 999999;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            backface-visibility: hidden;
+            will-change: opacity, transform;
         }
 
         canvas#effects.show {
@@ -587,7 +591,6 @@
                 <div class="pill"><b>Horário</b> <span id="timeTxt">16:00</span></div>
                 <div class="pill"><b>Local</b> <span><a id="mapLink" target="_blank" rel="noreferrer noopener">Ver no
                             mapa</a></span></div>
-                <!-- REMOVIDO: Traje -->
             </div>
 
             <div class="countdown" id="countdown" aria-live="polite"></div>
@@ -605,14 +608,14 @@
         </article>
     </main>
 
-    <!-- Canvas por cima de tudo -->
+    <!-- Canvas sobre tudo -->
     <canvas id="effects"></canvas>
 
     <script>
         (function () {
             const cfg = {
                 couple: { bride: "Gislaine", groom: "Wandson" },
-                rsvpPhone: "5568996129443",  // seu WhatsApp
+                rsvpPhone: "5568996129443", // +55 68 99612-9443
                 eventDate: new Date("2026-04-10T00:00:00-04:00"),
                 eventTimeText: "16:00",
                 mapUrl: "https://maps.google.com/?q=Igreja+da+Sua+Escolha",
@@ -623,13 +626,10 @@
                 }
             };
 
-            // Elementos
             const envelope = document.getElementById('envelope');
             const hint = document.getElementById('hint');
             const openBtn = document.getElementById('openBtn');
             const card = document.getElementById('card');
-            const guestEl = document.getElementById('guest');
-            const greetEl = document.getElementById('greet');
             const dateTxt = document.getElementById('dateTxt');
             const timeTxt = document.getElementById('timeTxt');
             const mapLink = document.getElementById('mapLink');
@@ -637,207 +637,101 @@
             const declineBtn = document.getElementById('declineBtn');
             const calendarBtn = document.getElementById('calendarBtn');
 
-            // Canvas FX
+            /* Canvas FX */
             const canvas = document.getElementById('effects');
             const ctx = canvas.getContext('2d');
             const dpr = Math.max(1, devicePixelRatio || 1);
             let parts = [], animId = null;
 
-            function resizeCanvas() { canvas.width = Math.floor(innerWidth * dpr); canvas.height = Math.floor(innerHeight * dpr); }
-            function rand(a, b) { return a + Math.random() * (b - a); }
+            function setCanvasCssSize() { canvas.style.width = '100vw'; canvas.style.height = '100vh'; }
+            function resizeCanvas() { setCanvasCssSize(); canvas.width = Math.floor(innerWidth * dpr); canvas.height = Math.floor(innerHeight * dpr); }
             function hsla(h, s, l, a) { return `hsla(${h}, ${s}%, ${l}%, ${a})`; }
 
-            // Desenho de coração
             function drawHeart(x, y, s, rot, fill) {
-                ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
-                ctx.scale(s, s);
-                ctx.beginPath();
-                ctx.moveTo(0, -10);
+                ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+                ctx.beginPath(); ctx.moveTo(0, -10);
                 ctx.bezierCurveTo(-12, -22, -34, -4, 0, 18);
                 ctx.bezierCurveTo(34, -4, 12, -22, 0, -10);
-                ctx.closePath();
-                ctx.fillStyle = fill; ctx.fill();
-                ctx.restore();
+                ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); ctx.restore();
             }
-            // Pétala simples (elipse)
             function drawPetal(x, y, rx, ry, rot, fill) {
                 ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
                 ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
                 ctx.fillStyle = fill; ctx.fill(); ctx.restore();
             }
-            // Anel dourado
             function drawRing(x, y, r, alpha) {
                 ctx.lineWidth = Math.max(2 * dpr, r * 0.06);
                 const grad = ctx.createRadialGradient(x, y, r * 0.2, x, y, r);
                 grad.addColorStop(0, hsla(40, 70, 70, alpha));
                 grad.addColorStop(1, hsla(42, 64, 46, alpha * 0.7));
-                ctx.strokeStyle = grad;
-                ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+                ctx.strokeStyle = grad; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
             }
+            function bringCanvasToFront() { if (canvas.parentNode !== document.body) document.body.appendChild(canvas); void canvas.offsetHeight; canvas.classList.add('show'); }
 
             function ensureAnimating() {
                 if (animId) return;
-                resizeCanvas(); canvas.classList.add('show');
+                resizeCanvas(); bringCanvasToFront();
                 const step = () => {
                     animId = requestAnimationFrame(step);
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                    // leve véu iluminado
-                    ctx.fillStyle = 'rgba(255,245,235,0.18)';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = 'rgba(255,245,235,0.18)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                     for (let i = parts.length - 1; i >= 0; i--) {
-                        const p = parts[i];
-                        p.life--;
-                        p.x += p.vx; p.y += p.vy;
-                        p.vy += p.g || 0;
-                        p.rot += p.vr || 0;
-
-                        // desenha
+                        const p = parts[i]; p.life--; p.x += p.vx; p.y += p.vy; p.vy += p.g || 0; p.rot += p.vr || 0;
                         if (p.kind === 'spark') {
-                            p.trail.push([p.x, p.y]);
-                            if (p.trail.length > 6) p.trail.shift();
-                            ctx.strokeStyle = p.color;
-                            ctx.lineWidth = p.size * 0.6;
-                            ctx.beginPath();
-                            for (let j = 0; j < p.trail.length; j++) {
-                                const [tx, ty] = p.trail[j];
-                                if (j === 0) ctx.moveTo(tx, ty); else ctx.lineTo(tx, ty);
-                            }
-                            ctx.stroke();
-                            ctx.fillStyle = p.color;
-                            ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
-                        } else if (p.kind === 'heart') {
-                            drawHeart(p.x, p.y, p.size, p.rot, p.color);
-                        } else if (p.kind === 'petal') {
-                            drawPetal(p.x, p.y, p.size * 1.1, p.size * 0.7, p.rot, p.color);
-                        } else if (p.kind === 'ring') {
-                            drawRing(p.x, p.y, p.size, p.life / p.maxLife);
-                            p.size += p.vr;
-                        } else if (p.kind === 'glow') {
-                            const grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 2);
-                            grd.addColorStop(0, `rgba(255,220,166,${0.8 * (p.life / p.maxLife)})`);
-                            grd.addColorStop(1, `rgba(255,220,166,0)`);
-                            ctx.fillStyle = grd;
-                            ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 2, 0, Math.PI * 2); ctx.fill();
-                        }
-
+                            p.trail.push([p.x, p.y]); if (p.trail.length > 6) p.trail.shift();
+                            ctx.strokeStyle = p.color; ctx.lineWidth = p.size * 0.6;
+                            ctx.beginPath(); for (let j = 0; j < p.trail.length; j++) { const [tx, ty] = p.trail[j]; if (j === 0) ctx.moveTo(tx, ty); else ctx.lineTo(tx, ty); } ctx.stroke();
+                            ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+                        } else if (p.kind === 'heart') { drawHeart(p.x, p.y, p.size, p.rot, p.color); }
+                        else if (p.kind === 'petal') { drawPetal(p.x, p.y, p.size * 1.1, p.size * 0.7, p.rot, p.color); }
+                        else if (p.kind === 'ring') { drawRing(p.x, p.y, p.size, p.life / p.maxLife); p.size += p.vr; }
+                        else if (p.kind === 'glow') { const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 2); g.addColorStop(0, `rgba(255,220,166,${0.8 * (p.life / p.maxLife)})`); g.addColorStop(1, 'rgba(255,220,166,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 2, 0, Math.PI * 2); ctx.fill(); }
                         if (p.life <= 0) parts.splice(i, 1);
                     }
-
-                    if (parts.length === 0) {
-                        cancelAnimationFrame(animId); animId = null; canvas.classList.remove('show');
-                    }
-                };
-                step();
+                    if (parts.length === 0) { cancelAnimationFrame(animId); animId = null; canvas.classList.remove('show'); }
+                }; step();
             }
 
             function burstFrom(x, y) {
-                // Anel e brilho
                 parts.push({ kind: 'ring', x, y, size: 8 * dpr, vr: 4 * dpr, life: 28, maxLife: 28 });
                 parts.push({ kind: 'glow', x, y, size: 18 * dpr, life: 24, maxLife: 24 });
-
-                // Fogos (faíscas radiais)
                 const colors = ['#e7b6c6', '#d48aa3', '#ffd27a', '#c7a26a', '#ffffff'];
                 for (let i = 0; i < 40; i++) {
-                    const a = Math.random() * Math.PI * 2;
-                    const sp = (4 + Math.random() * 4) * dpr;
-                    parts.push({
-                        kind: 'spark',
-                        x, y,
-                        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
-                        g: 0.06 * dpr,
-                        size: (1.5 + Math.random() * 1.1) * dpr,
-                        color: colors[i % colors.length],
-                        trail: [],
-                        life: 45 + Math.random() * 25,
-                    });
+                    const a = Math.random() * Math.PI * 2, sp = (4 + Math.random() * 4) * dpr;
+                    parts.push({ kind: 'spark', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 0.06 * dpr, size: (1.5 + Math.random() * 1.1) * dpr, color: colors[i % colors.length], trail: [], life: 45 + Math.random() * 25 });
                 }
-                // Corações e pétalas subindo
                 for (let i = 0; i < 20; i++) {
-                    parts.push({
-                        kind: 'heart',
-                        x: x + (Math.random() * 80 - 40) * dpr, y: y + (Math.random() * 20 - 10) * dpr,
-                        vx: (Math.random() * 1.6 - 0.8) * dpr, vy: (-2.6 - Math.random()) * dpr,
-                        g: 0.03 * dpr,
-                        size: (0.18 + Math.random() * 0.1) * dpr * 30,
-                        rot: (Math.random() * 1 - 0.5), vr: (Math.random() * 0.04 - 0.02),
-                        life: 80 + Math.random() * 40,
-                        color: 'rgba(235,158,182,0.9)'
-                    });
+                    parts.push({ kind: 'heart', x: x + (Math.random() * 80 - 40) * dpr, y: y + (Math.random() * 20 - 10) * dpr, vx: (Math.random() * 1.6 - 0.8) * dpr, vy: (-2.6 - Math.random()) * dpr, g: 0.03 * dpr, size: (0.18 + Math.random() * 0.1) * dpr * 30, rot: (Math.random() - 0.5), vr: (Math.random() * 0.04 - 0.02), life: 80 + Math.random() * 40, color: 'rgba(235,158,182,0.9)' });
                 }
                 for (let i = 0; i < 24; i++) {
-                    parts.push({
-                        kind: 'petal',
-                        x: x + (Math.random() * 100 - 50) * dpr, y: y + (Math.random() * 20 - 10) * dpr,
-                        vx: (Math.random() * 2 - 1) * dpr, vy: (-2.0 - Math.random() * 0.8) * dpr,
-                        g: 0.025 * dpr, size: (6 + Math.random() * 4) * dpr,
-                        rot: Math.random() * Math.PI, vr: (Math.random() * 0.06 - 0.03),
-                        life: 90 + Math.random() * 50,
-                        color: 'rgba(255,205,221,0.9)'
-                    });
+                    parts.push({ kind: 'petal', x: x + (Math.random() * 100 - 50) * dpr, y: y + (Math.random() * 20 - 10) * dpr, vx: (Math.random() * 2 - 1) * dpr, vy: (-2.0 - Math.random() * 0.8) * dpr, g: 0.025 * dpr, size: (6 + Math.random() * 4) * dpr, rot: Math.random() * Math.PI, vr: (Math.random() * 0.06 - 0.03), life: 90 + Math.random() * 50, color: 'rgba(255,205,221,0.9)' });
                 }
                 ensureAnimating();
             }
 
             function epicCelebrate(btn, durationMs = 3000) {
                 const r = btn.getBoundingClientRect();
-                const cx = (r.left + r.width / 2) * dpr;
-                const cy = (r.top + r.height / 2) * dpr;
+                const cx = (r.left + r.width / 2) * dpr, cy = (r.top + r.height / 2) * dpr;
+                if (btn.dataset.busy === "1") return; btn.dataset.busy = "1";
+                btn.classList.add('loading'); const shine = document.createElement('i'); shine.className = 'shine'; btn.appendChild(shine);
 
-                // estado loading visual
-                btn.classList.add('loading');
-                const shine = document.createElement('i'); shine.className = 'shine'; btn.appendChild(shine);
-
-                // bursts a cada 350ms + chuva contínua
+                resizeCanvas(); bringCanvasToFront(); burstFrom(cx, cy);
                 const bursts = setInterval(() => burstFrom(cx, cy), 350);
+                const rain = setInterval(() => { for (let i = 0; i < 10; i++) { parts.push({ kind: 'heart', x: cx + (Math.random() * r.width - r.width / 2) * dpr, y: cy - r.height * 0.3 * dpr, vx: (Math.random() * 1.6 - 0.8) * dpr, vy: (-2.4 - Math.random()) * dpr, g: 0.03 * dpr, size: (0.16 + Math.random() * 0.08) * dpr * 30, rot: (Math.random() * 0.6 - 0.3), vr: (Math.random() * 0.04 - 0.02), life: 80 + Math.random() * 40, color: 'rgba(255,170,190,0.9)' }); parts.push({ kind: 'petal', x: cx + (Math.random() * r.width - r.width / 2) * dpr, y: cy - r.height * 0.2 * dpr, vx: (Math.random() * 2 - 1) * dpr, vy: (-1.8 - Math.random()) * dpr, g: 0.025 * dpr, size: (6 + Math.random() * 4) * dpr, rot: Math.random() * Math.PI, vr: (Math.random() * 0.06 - 0.03), life: 90 + Math.random() * 50, color: 'rgba(255,210,225,0.9)' }); } ensureAnimating(); }, 90);
+                const rings = setInterval(() => { parts.push({ kind: 'ring', x: cx, y: cy, size: 10 * dpr, vr: 5 * dpr, life: 32, maxLife: 32 }); ensureAnimating(); }, 400);
 
-                const rain = setInterval(() => {
-                    for (let i = 0; i < 10; i++) {
-                        parts.push({
-                            kind: 'heart',
-                            x: cx + (Math.random() * r.width - r.width / 2) * dpr,
-                            y: cy - r.height * 0.3 * dpr,
-                            vx: (Math.random() * 1.6 - 0.8) * dpr, vy: (-2.4 - Math.random()) * dpr,
-                            g: 0.03 * dpr, size: (0.16 + Math.random() * 0.08) * dpr * 30, rot: (Math.random() * 0.6 - 0.3), vr: (Math.random() * 0.04 - 0.02),
-                            life: 80 + Math.random() * 40, color: 'rgba(255,170,190,0.9)'
-                        });
-                        parts.push({
-                            kind: 'petal',
-                            x: cx + (Math.random() * r.width - r.width / 2) * dpr,
-                            y: cy - r.height * 0.2 * dpr,
-                            vx: (Math.random() * 2 - 1) * dpr, vy: (-1.8 - Math.random()) * dpr,
-                            g: 0.025 * dpr, size: (6 + Math.random() * 4) * dpr, rot: Math.random() * Math.PI, vr: (Math.random() * 0.06 - 0.03),
-                            life: 90 + Math.random() * 50, color: 'rgba(255,210,225,0.9)'
-                        });
-                    }
-                    ensureAnimating();
-                }, 90);
-
-                // anéis dourados ocasionais
-                const rings = setInterval(() => {
-                    parts.push({ kind: 'ring', x: cx, y: cy, size: 10 * dpr, vr: 5 * dpr, life: 32, maxLife: 32 });
-                    ensureAnimating();
-                }, 400);
-
-                // finaliza após durationMs
-                setTimeout(() => {
-                    clearInterval(bursts); clearInterval(rain); clearInterval(rings);
-                    btn.classList.remove('loading'); if (shine.parentNode) shine.remove();
-                }, durationMs);
+                setTimeout(() => { clearInterval(bursts); clearInterval(rain); clearInterval(rings); btn.classList.remove('loading'); if (shine.parentNode) shine.remove(); }, durationMs);
             }
 
-            // ------- Inicialização ------- //
+            /* Inicialização */
             document.getElementById('bride').textContent = cfg.couple.bride;
             document.getElementById('groom').textContent = cfg.couple.groom;
-            guestEl.textContent = "você";
-            greetEl.textContent = cfg.messages.greet();
             const formatDateLong = (d) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
             dateTxt.textContent = formatDateLong(cfg.eventDate);
             timeTxt.textContent = cfg.eventTimeText;
             mapLink.href = cfg.mapUrl;
 
-            // Abrir envelope
             const open = () => {
                 envelope.classList.add('open');
                 if (hint) { hint.style.opacity = '0'; hint.style.pointerEvents = 'none'; }
@@ -848,16 +742,13 @@
             document.querySelector('.seal').addEventListener('click', open);
             document.querySelector('.env-body').addEventListener('click', open);
 
-            // Contagem regressiva
+            /* Countdown */
             const countdownEl = document.getElementById('countdown');
             function updateCountdown() {
                 const now = new Date();
                 const target = new Date(cfg.eventDate.getFullYear(), cfg.eventDate.getMonth(), cfg.eventDate.getDate() + 1);
                 let diff = target - now; if (diff < 0) diff = 0;
-                const d = Math.floor(diff / 86400000);
-                const h = Math.floor(diff % 86400000 / 3600000);
-                const m = Math.floor(diff % 3600000 / 60000);
-                const s = Math.floor(diff % 60000 / 1000);
+                const d = Math.floor(diff / 86400000), h = Math.floor(diff % 86400000 / 3600000), m = Math.floor(diff % 3600000 / 60000), s = Math.floor(diff % 60000 / 1000);
                 countdownEl.innerHTML =
                     `<div class="cd"><b>${d}</b><small>dias</small></div>
          <div class="cd"><b>${h}</b><small>horas</small></div>
@@ -866,21 +757,19 @@
             }
             setInterval(updateCountdown, 1000); updateCountdown();
 
-            // WhatsApp helper
+            /* WhatsApp helper */
             const wa = (text) => `https://wa.me/${cfg.rsvpPhone}?text=${encodeURIComponent(text)}`;
 
-            // Aceitar: 3s de animação e depois abre o WhatsApp
+            /* Aceitar: anima 3s e redireciona NA MESMA ABA (sem popup) */
             acceptBtn.addEventListener('click', () => {
                 epicCelebrate(acceptBtn, 3000);
-                setTimeout(() => { window.open(wa(cfg.messages.accept), '_blank'); }, 3000);
+                setTimeout(() => { location.href = wa(cfg.messages.accept); }, 3000);
             });
 
-            // Recusar: abre direto
-            declineBtn.addEventListener('click', () => {
-                window.open(wa(cfg.messages.decline), '_blank');
-            });
+            /* Recusar: abre diretamente na mesma aba (mais confiável no iOS) */
+            declineBtn.addEventListener('click', () => { location.href = wa(cfg.messages.decline); });
 
-            // ICS
+            /* ICS */
             function downloadICS() {
                 const yyyy = cfg.eventDate.getFullYear();
                 const mm = String(cfg.eventDate.getMonth() + 1).padStart(2, '0');
@@ -903,11 +792,7 @@ LOCATION:${cfg.mapUrl}
 END:VEVENT
 END:VCALENDAR`;
                 const blob = new Blob([ics], { type: 'text/calendar' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = 'casamento-gislaine-wandson.ics';
-                a.click();
-                URL.revokeObjectURL(a.href);
+                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'casamento-gislaine-wandson.ics'; a.click(); URL.revokeObjectURL(a.href);
             }
             calendarBtn.addEventListener('click', downloadICS);
 

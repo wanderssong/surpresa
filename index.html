@@ -117,6 +117,7 @@
             opacity: .95
         }
 
+        /* brilhinhos no selo */
         .sparkle {
             position: absolute;
             left: 50%;
@@ -561,7 +562,28 @@
             background: #fbf8f4;
         }
 
-        /* Animações do modal (entrada/saída) */
+        /* Aviso (novo) sobre as caixinhas */
+        .modal-note {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff7ef;
+            border: 1px solid rgba(199, 162, 106, .45);
+            color: #5a4a33;
+            padding: 10px 12px;
+            border-radius: 12px;
+            text-align: left;
+            margin: 10px 0 6px;
+            font-size: 14px;
+        }
+
+        .modal-note i {
+            font-style: normal;
+            font-size: 18px;
+            line-height: 1
+        }
+
+        /* Animações do modal */
         .modal[aria-hidden="false"] .modal-backdrop {
             animation: backdropIn .28s ease-out both;
         }
@@ -699,6 +721,13 @@
                     <p class="modal-text">
                         Obrigado por aceitar ser padrinho/madrinha. Vocês são parte essencial desse momento.
                     </p>
+
+                    <!-- NOVO AVISO -->
+                    <div class="modal-note">
+                        <i>🎁</i>
+                        <div><b>Aviso:</b> em breve entregaremos as <b>caixinhas dos padrinhos</b>.  </div>
+                    </div>
+
                     <button class="btn" id="thanksOkBtn">
                         <span>Ok, enviar confirmação no WhatsApp</span>
                     </button>
@@ -714,10 +743,11 @@
         (function () {
             const cfg = {
                 couple: { bride: "Gislaine", groom: "Wandson" },
-                rsvpPhone: "5568996129443", // +55 68 99612-9443
+                rsvpPhone: "5568996129443",
                 eventDate: new Date("2026-04-10T00:00:00-04:00"),
                 eventTimeText: "16:00",
-                mapUrl: "https://maps.google.com/?q=Igreja+da+Sua+Escolha",
+                // ✅ Localização atualizada
+                mapUrl: "https://maps.app.goo.gl/kSxYRzMQfReGQSyc6?g_st=ac",
                 messages: {
                     greet: () => `Queremos você pertinho neste dia inesquecível. Aceita viver esse momento com a gente?`,
                     accept: `Olá! Confirmo com muita alegria: serei padrinho/madrinha do casamento da Gislaine & Wandson! 💖`,
@@ -736,7 +766,7 @@
             const declineBtn = document.getElementById('declineBtn');
             const calendarBtn = document.getElementById('calendarBtn');
 
-            /* Inicialização de textos */
+            /* Inicialização */
             document.getElementById('bride').textContent = cfg.couple.bride;
             document.getElementById('groom').textContent = cfg.couple.groom;
             const formatDateLong = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -786,7 +816,7 @@
                 if (!win) { navigateSelf(url); }
             }
 
-            /* ===== Modal helpers (com animação ao abrir/fechar) ===== */
+            /* Modal helpers */
             const thanksModal = document.getElementById('thanksModal');
             const thanksOkBtn = document.getElementById('thanksOkBtn');
 
@@ -799,7 +829,6 @@
             }
             function hideThanksModal() {
                 if (!thanksModal) return;
-                // anima saída antes de esconder
                 thanksModal.classList.add('closing');
                 const onEnd = (e) => {
                     if (e.target !== thanksModal.querySelector('.modal-card')) return;
@@ -810,22 +839,14 @@
                 };
                 thanksModal.addEventListener('animationend', onEnd, true);
             }
-            // fechar por backdrop ou botão "Fechar"
             document.addEventListener('click', (e) => {
                 const t = e.target;
                 if (t && t.dataset && t.dataset.close === '1') { hideThanksModal(); }
             });
 
-            /* BOTÕES */
-            // ✅ Sem animação no botão de aceitar: abre apenas o modal animado
-            acceptBtn.addEventListener('click', () => {
-                showThanksModal();
-            });
-
-            declineBtn.addEventListener('click', () => {
-                openWhatsTab(cfg.messages.decline);
-            });
-
+            /* Botões */
+            acceptBtn.addEventListener('click', () => { showThanksModal(); });
+            declineBtn.addEventListener('click', () => { openWhatsTab(cfg.messages.decline); });
             if (thanksOkBtn) {
                 thanksOkBtn.addEventListener('click', () => {
                     hideThanksModal();

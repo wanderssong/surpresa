@@ -19,6 +19,10 @@
             --card: #fdf8ef;
             --accent: #3d5a80;
             --shadow: 0 28px 60px rgba(0, 0, 0, .12);
+
+            /* intensidades suaves para o modal */
+            --backdrop-opacity: .28;
+            --backdrop-blur: 1.2px;
         }
 
         * {
@@ -117,7 +121,6 @@
             opacity: .95
         }
 
-        /* brilhinhos no selo */
         .sparkle {
             position: absolute;
             left: 50%;
@@ -491,7 +494,13 @@
             margin: 22px 0 6px
         }
 
-        /* ===== Modal fofinho ===== */
+        @media (min-width:560px) {
+            .grid {
+                grid-template-columns: 1fr 1fr
+            }
+        }
+
+        /* ===== MODAL (legível!) ===== */
         .modal {
             position: fixed;
             inset: 0;
@@ -508,9 +517,22 @@
         .modal-backdrop {
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, .35);
-            backdrop-filter: blur(2px);
+            background: rgba(0, 0, 0, var(--backdrop-opacity));
+            backdrop-filter: blur(var(--backdrop-blur));
             opacity: 0;
+        }
+
+        .modal-backdrop::after {
+            content: "";
+            position: absolute;
+            inset: -10%;
+            pointer-events: none;
+            opacity: 0.45;
+            background:
+                radial-gradient(900px 480px at 20% 10%, rgba(255, 230, 240, .35), transparent 60%),
+                radial-gradient(760px 420px at 80% 90%, rgba(255, 220, 180, .28), transparent 65%),
+                radial-gradient(680px 400px at 50% 50%, rgba(199, 162, 106, .22), transparent 60%);
+            filter: blur(18px);
         }
 
         .modal-card {
@@ -521,10 +543,35 @@
             border: 1px solid #efe9e3;
             border-radius: 24px;
             padding: 24px 20px 18px;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, .18), 0 8px 22px rgba(0, 0, 0, .08);
             text-align: center;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, .18), 0 8px 22px rgba(0, 0, 0, .08);
+            /* estado base CRISP (sem blur) */
+            opacity: 1;
+            transform: none;
+            filter: none;
+        }
+
+        /* brilho diagonal sutil (não cobre o conteúdo) */
+        .modal-card::before {
+            content: "";
+            position: absolute;
+            inset: -8% -20%;
+            transform: skewX(-18deg) translateX(-120%);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, .55) 45%, rgba(255, 255, 255, 0) 60%);
+            filter: blur(6px);
+            border-radius: 28px;
             opacity: 0;
-            transform: translateY(10px) scale(.96);
+            pointer-events: none;
+        }
+
+        .modal-card::after {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            border-radius: inherit;
+            pointer-events: none;
+            opacity: 0;
+            box-shadow: 0 0 0 2px rgba(199, 162, 106, .45), 0 0 30px 6px rgba(233, 180, 205, .25) inset;
         }
 
         .modal-emoji {
@@ -535,8 +582,7 @@
 
         .modal-card h3 {
             margin: 6px 0 8px;
-            font-family: 'Poppins', system-ui, -apple-system, sans-serif;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--ink);
         }
 
@@ -562,7 +608,6 @@
             background: #fbf8f4;
         }
 
-        /* Aviso (novo) sobre as caixinhas */
         .modal-note {
             display: flex;
             align-items: center;
@@ -583,24 +628,201 @@
             line-height: 1
         }
 
-        /* Animações do modal */
+        /* Efeitos festivos */
+        .ringburst {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(.2);
+            opacity: 0;
+            box-shadow: 0 0 0 3px rgba(199, 162, 106, .9);
+            pointer-events: none;
+        }
+
+        .modal-stars {
+            pointer-events: none;
+            position: absolute;
+            inset: -6%;
+        }
+
+        .modal-stars span {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff 0 40%, #ffdca6 41% 70%, transparent 71%);
+            box-shadow: 0 0 14px rgba(255, 220, 166, .85);
+            opacity: 0;
+            transform: scale(.3);
+        }
+
+        .modal-stars span:nth-child(1) {
+            left: 10%;
+            top: 8%
+        }
+
+        .modal-stars span:nth-child(2) {
+            right: 12%;
+            top: 12%
+        }
+
+        .modal-stars span:nth-child(3) {
+            left: 4%;
+            top: 40%
+        }
+
+        .modal-stars span:nth-child(4) {
+            right: 6%;
+            top: 28%
+        }
+
+        .modal-stars span:nth-child(5) {
+            left: 14%;
+            bottom: 12%
+        }
+
+        .modal-stars span:nth-child(6) {
+            right: 10%;
+            bottom: 10%
+        }
+
+        .modal-stars span:nth-child(7) {
+            left: 50%;
+            top: 52%
+        }
+
+        .modal-stars span:nth-child(8) {
+            left: 50%;
+            top: 6%
+        }
+
+        .modal-stars span:nth-child(9) {
+            right: 30%;
+            bottom: 22%
+        }
+
+        .modal-stars span:nth-child(10) {
+            left: 24%;
+            top: 72%
+        }
+
+        .modal-stars span:nth-child(11) {
+            left: 32%;
+            top: 16%
+        }
+
+        .modal-stars span:nth-child(12) {
+            right: 22%;
+            top: 54%
+        }
+
+        /* vetores das estrelas */
+        .modal-stars span:nth-child(1) {
+            --tx: -90px;
+            --ty: -70px
+        }
+
+        .modal-stars span:nth-child(2) {
+            --tx: 90px;
+            --ty: -80px
+        }
+
+        .modal-stars span:nth-child(3) {
+            --tx: -120px;
+            --ty: -10px
+        }
+
+        .modal-stars span:nth-child(4) {
+            --tx: 120px;
+            --ty: -20px
+        }
+
+        .modal-stars span:nth-child(5) {
+            --tx: -100px;
+            --ty: 60px
+        }
+
+        .modal-stars span:nth-child(6) {
+            --tx: 90px;
+            --ty: 60px
+        }
+
+        .modal-stars span:nth-child(7) {
+            --tx: 0px;
+            --ty: -120px
+        }
+
+        .modal-stars span:nth-child(8) {
+            --tx: 0px;
+            --ty: -130px
+        }
+
+        .modal-stars span:nth-child(9) {
+            --tx: 70px;
+            --ty: 40px
+        }
+
+        .modal-stars span:nth-child(10) {
+            --tx: -70px;
+            --ty: 40px
+        }
+
+        .modal-stars span:nth-child(11) {
+            --tx: -40px;
+            --ty: -100px
+        }
+
+        .modal-stars span:nth-child(12) {
+            --tx: 60px;
+            --ty: -90px
+        }
+
+        /* Disparos de animação (entrada/saída) */
         .modal[aria-hidden="false"] .modal-backdrop {
-            animation: backdropIn .28s ease-out both;
+            animation: fadeIn .28s ease-out both;
+        }
+
+        .modal[aria-hidden="false"] .modal-backdrop::after {
+            animation: fadeIn .4s .06s ease both;
         }
 
         .modal[aria-hidden="false"] .modal-card {
-            animation: modalIn .38s cubic-bezier(.22, 1, .36, 1) both;
+            animation: modalPop .48s cubic-bezier(.22, 1, .36, 1) both;
+        }
+
+        .modal[aria-hidden="false"] .modal-card::before {
+            animation: sheen .8s .2s ease-out both;
+        }
+
+        .modal[aria-hidden="false"] .modal-card::after {
+            animation: fadeIn .35s .14s ease-out both;
+        }
+
+        .modal[aria-hidden="false"] .ringburst {
+            animation: ring .8s .06s ease-out both;
+        }
+
+        .modal[aria-hidden="false"] .modal-stars span {
+            animation: star 0.9s .12s ease-out both;
         }
 
         .modal.closing .modal-backdrop {
-            animation: backdropOut .22s ease-in both;
+            animation: fadeOut .2s ease-in both;
+        }
+
+        .modal.closing .modal-backdrop::after {
+            animation: fadeOut .2s ease both;
         }
 
         .modal.closing .modal-card {
-            animation: modalOut .24s ease-in both;
+            animation: modalOut .22s ease both;
         }
 
-        @keyframes backdropIn {
+        /* Keyframes mais “limpos” (sem blur no conteúdo) */
+        @keyframes fadeIn {
             from {
                 opacity: 0
             }
@@ -610,7 +832,7 @@
             }
         }
 
-        @keyframes backdropOut {
+        @keyframes fadeOut {
             from {
                 opacity: 1
             }
@@ -620,18 +842,13 @@
             }
         }
 
-        @keyframes modalIn {
-            0% {
+        @keyframes modalPop {
+            from {
                 opacity: 0;
                 transform: translateY(14px) scale(.94)
             }
 
-            60% {
-                opacity: 1;
-                transform: translateY(0) scale(1.02)
-            }
-
-            100% {
+            to {
                 opacity: 1;
                 transform: translateY(0) scale(1)
             }
@@ -645,13 +862,68 @@
 
             to {
                 opacity: 0;
-                transform: translateY(8px) scale(.96)
+                transform: translateY(8px) scale(.98)
             }
         }
 
-        @media (min-width:560px) {
-            .grid {
-                grid-template-columns: 1fr 1fr
+        @keyframes sheen {
+            from {
+                opacity: 0;
+                transform: skewX(-18deg) translateX(-120%)
+            }
+
+            25% {
+                opacity: .7
+            }
+
+            to {
+                opacity: 0;
+                transform: skewX(-18deg) translateX(130%)
+            }
+        }
+
+        @keyframes ring {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(.2)
+            }
+
+            70% {
+                opacity: .95
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(10)
+            }
+        }
+
+        @keyframes star {
+            0% {
+                opacity: 0;
+                transform: translate(0, 0) scale(.3)
+            }
+
+            35% {
+                opacity: 1
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx, 40px), var(--ty, -40px)) scale(1.35)
+            }
+        }
+
+        /* Acessibilidade: reduz animação se o usuário preferir */
+        @media (prefers-reduced-motion: reduce) {
+            .modal * {
+                animation: none !important;
+                transition: none !important
+            }
+
+            .modal-backdrop,
+            .modal-backdrop::after {
+                opacity: 1
             }
         }
     </style>
@@ -663,7 +935,6 @@
             <div class="env-body"></div>
             <div class="env-lid" id="lid" aria-hidden="true"></div>
             <div class="seal" role="button" aria-label="Abrir"><span>Com amor</span></div>
-            <div class="sparkle" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
 
             <div class="letter" id="letter">
                 <div class="letter-content">
@@ -712,28 +983,30 @@
 
             <footer>Com carinho, Gislaine & Wandson • 2026</footer>
 
-            <!-- Modal fofinho de agradecimento -->
+            <!-- Modal -->
             <div class="modal" id="thanksModal" aria-hidden="true" role="dialog" aria-labelledby="thanksTitle">
                 <div class="modal-backdrop" data-close="1"></div>
                 <div class="modal-card" role="document">
+                    <i class="ringburst" aria-hidden="true"></i>
+                    <div class="modal-stars" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span><span></span><span></span>
+                        <span></span><span></span><span></span><span></span><span></span><span></span>
+                    </div>
+
                     <div class="modal-emoji">💞</div>
                     <h3 id="thanksTitle">Que alegria ter você com a gente!</h3>
                     <p class="modal-text">
                         Obrigado por aceitar ser padrinho/madrinha. Vocês são parte essencial desse momento.
                     </p>
 
-                    <!-- NOVO AVISO -->
                     <div class="modal-note">
                         <i>🎁</i>
-                        <div><b>Aviso:</b> em breve entregaremos as <b>caixinhas dos padrinhos</b>.  </div>
+                        <div><b>Aviso:</b> em breve entregaremos as <b>caixinhas dos padrinhos</b>. Fique de olho no
+                            WhatsApp!</div>
                     </div>
 
-                    <button class="btn" id="thanksOkBtn">
-                        <span>Ok, enviar confirmação no WhatsApp</span>
-                    </button>
-                    <button class="btn ghost modal-close" data-close="1">
-                        <span>Fechar</span>
-                    </button>
+                    <button class="btn" id="thanksOkBtn"><span>Ok, enviar confirmação no WhatsApp</span></button>
+                    <button class="btn ghost modal-close" data-close="1"><span>Fechar</span></button>
                 </div>
             </div>
         </article>
@@ -746,7 +1019,6 @@
                 rsvpPhone: "5568996129443",
                 eventDate: new Date("2026-04-10T00:00:00-04:00"),
                 eventTimeText: "16:00",
-                // ✅ Localização atualizada
                 mapUrl: "https://maps.app.goo.gl/kSxYRzMQfReGQSyc6?g_st=ac",
                 messages: {
                     greet: () => `Queremos você pertinho neste dia inesquecível. Aceita viver esse momento com a gente?`,
@@ -803,32 +1075,26 @@
             }
             setInterval(updateCountdown, 1000); updateCountdown();
 
-            /* WhatsApp helpers */
-            function navigateSelf(url) {
-                const a = document.createElement('a'); a.href = url; a.target = "_self"; a.rel = "noreferrer";
-                document.body.appendChild(a); a.click(); a.remove();
-            }
+            /* WhatsApp */
+            function navigateSelf(url) { const a = document.createElement('a'); a.href = url; a.target = "_self"; a.rel = "noreferrer"; document.body.appendChild(a); a.click(); a.remove(); }
             function openWhatsTab(text) {
                 const phone = String(cfg.rsvpPhone).replace(/\D/g, '');
                 const msg = encodeURIComponent(text);
                 const url = `https://wa.me/${phone}?text=${msg}`;
-                const win = window.open(url, '_blank', 'noopener');
-                if (!win) { navigateSelf(url); }
+                const win = window.open(url, '_blank', 'noopener'); if (!win) { navigateSelf(url); }
             }
 
-            /* Modal helpers */
+            /* Modal */
             const thanksModal = document.getElementById('thanksModal');
             const thanksOkBtn = document.getElementById('thanksOkBtn');
 
             function showThanksModal() {
-                if (!thanksModal) return;
                 if (thanksModal.parentNode !== document.body) document.body.appendChild(thanksModal);
                 thanksModal.classList.remove('closing');
                 thanksModal.setAttribute('aria-hidden', 'false');
                 document.documentElement.style.overflow = 'hidden';
             }
             function hideThanksModal() {
-                if (!thanksModal) return;
                 thanksModal.classList.add('closing');
                 const onEnd = (e) => {
                     if (e.target !== thanksModal.querySelector('.modal-card')) return;
@@ -839,20 +1105,11 @@
                 };
                 thanksModal.addEventListener('animationend', onEnd, true);
             }
-            document.addEventListener('click', (e) => {
-                const t = e.target;
-                if (t && t.dataset && t.dataset.close === '1') { hideThanksModal(); }
-            });
+            document.addEventListener('click', (e) => { const t = e.target; if (t && t.dataset && t.dataset.close === '1') { hideThanksModal(); } });
 
-            /* Botões */
             acceptBtn.addEventListener('click', () => { showThanksModal(); });
             declineBtn.addEventListener('click', () => { openWhatsTab(cfg.messages.decline); });
-            if (thanksOkBtn) {
-                thanksOkBtn.addEventListener('click', () => {
-                    hideThanksModal();
-                    openWhatsTab(cfg.messages.accept);
-                });
-            }
+            if (thanksOkBtn) { thanksOkBtn.addEventListener('click', () => { hideThanksModal(); openWhatsTab(cfg.messages.accept); }); }
 
             /* ICS */
             function downloadICS() {
